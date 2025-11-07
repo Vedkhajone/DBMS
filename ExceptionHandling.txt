@@ -1,0 +1,126 @@
+---------------------------------------------------------------
+-- EXPERIMENT 08 – PL/SQL EXCEPTION HANDLING (FULL PROGRAM SET)
+---------------------------------------------------------------
+
+---------------------------------------------------------------
+-- 1. CREATE SAMPLE TABLE
+---------------------------------------------------------------
+CREATE TABLE customers (
+    id NUMBER PRIMARY KEY,
+    name VARCHAR2(30),
+    age NUMBER,
+    address VARCHAR2(30),
+    salary NUMBER
+);
+
+INSERT INTO customers VALUES (1,'Ramesh',23,'Allahabad',20000);
+INSERT INTO customers VALUES (2,'Suresh',22,'Kanpur',22000);
+INSERT INTO customers VALUES (3,'Mahesh',24,'Ghaziabad',24000);
+INSERT INTO customers VALUES (4,'Chandan',25,'Noida',26000);
+INSERT INTO customers VALUES (5,'Alex',21,'Paris',28000);
+INSERT INTO customers VALUES (6,'Sunita',20,'Delhi',30000);
+
+---------------------------------------------------------------
+-- 2. SYSTEM DEFINED EXCEPTION – NO_DATA_FOUND
+---------------------------------------------------------------
+DECLARE
+    c_id customers.id%TYPE := 10;   -- ID does not exist
+    c_name customers.name%TYPE;
+    c_addr customers.address%TYPE;
+BEGIN
+    SELECT name, address INTO c_name, c_addr
+    FROM customers
+    WHERE id = c_id;
+
+    DBMS_OUTPUT.PUT_LINE('Name: ' || c_name);
+    DBMS_OUTPUT.PUT_LINE('Address: ' || c_addr);
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No such customer!');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Unknown Error!');
+END;
+/
+
+---------------------------------------------------------------
+-- 3. SYSTEM EXCEPTION – ZERO_DIVIDE
+---------------------------------------------------------------
+DECLARE
+    a NUMBER := 10;
+    b NUMBER := 0;
+    c NUMBER;
+BEGIN
+    c := a / b;
+    DBMS_OUTPUT.PUT_LINE('Result: ' || c);
+
+EXCEPTION
+    WHEN ZERO_DIVIDE THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Division by zero not allowed');
+END;
+/
+
+---------------------------------------------------------------
+-- 4. NUMBERED EXCEPTION USING PRAGMA EXCEPTION_INIT
+---------------------------------------------------------------
+CREATE TABLE student (
+    rollno NUMBER PRIMARY KEY,
+    sname VARCHAR2(30),
+    age NUMBER,
+    course VARCHAR2(20)
+);
+
+INSERT INTO student VALUES (11,'Anu',20,'BSC');
+INSERT INTO student VALUES (12,'Asha',21,'BCOM');
+INSERT INTO student VALUES (13,'Arpit',18,'BCA');
+INSERT INTO student VALUES (14,'Chetan',20,'BCA');
+INSERT INTO student VALUES (15,'Nihal',19,'BBA');
+
+DECLARE
+    sno student.rollno%TYPE;
+    snm student.sname%TYPE;
+    sage student.age%TYPE;
+    cr student.course%TYPE;
+
+    already_exists EXCEPTION;
+    PRAGMA EXCEPTION_INIT(already_exists, -1);   -- -1 ORA-00001 UNIQUE ERROR
+BEGIN
+    sno := 11; 
+    snm := 'Heena';
+    sage := 20;
+    cr := 'BSC';
+
+    INSERT INTO student VALUES (sno, snm, sage, cr);
+
+    DBMS_OUTPUT.PUT_LINE('Record Inserted');
+EXCEPTION
+    WHEN already_exists THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Record already exists');
+END;
+/
+
+---------------------------------------------------------------
+-- 5. USER DEFINED EXCEPTION
+---------------------------------------------------------------
+DECLARE
+    sno student.rollno%TYPE := 16;
+    snm student.sname%TYPE := 'Akash';
+    total_courses NUMBER := 5;
+
+    invalid_total EXCEPTION;
+BEGIN
+    IF total_courses > 3 THEN
+        RAISE invalid_total;
+    END IF;
+
+    INSERT INTO student VALUES (sno, snm, 20, 'BCA');
+
+EXCEPTION
+    WHEN invalid_total THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Total courses cannot be more than 3');
+END;
+/
+
+---------------------------------------------------------------
+-- END OF COMPLETE EXCEPTION HANDLING FILE
+---------------------------------------------------------------
