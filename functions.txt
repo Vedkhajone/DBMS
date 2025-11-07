@@ -1,0 +1,10 @@
+DELIMITER $$
+
+CREATE FUNCTION CalculateDiscount(price DECIMAL(10,2), discount DECIMAL(5,2))
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    RETURN price - (price * discount / 100);
+END $$
+
+DELIMITER ;
