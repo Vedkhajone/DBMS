@@ -1,0 +1,55 @@
+With the help of appropriate employee table, implement all types of Views.  
+
+-- schema + sample data
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS customer;
+
+CREATE TABLE customer (
+  customer_id INT PRIMARY KEY,
+  name VARCHAR(100),
+  city VARCHAR(50)
+);
+
+CREATE TABLE orders (
+  order_id INT PRIMARY KEY,
+  customer_id INT,
+  amount DECIMAL(10,2),
+  order_date DATE
+);
+
+INSERT INTO customer VALUES (1,'Alice','Mumbai'),(2,'Bob','Pune'),(3,'Cathy','Delhi');
+INSERT INTO orders VALUES (101,1,2500,'2025-10-01'),(102,1,1500,'2025-10-05'),(103,4,900,'2025-10-07');
+
+-- INNER JOIN
+SELECT c.customer_id, c.name, o.order_id, o.amount
+FROM customer c
+INNER JOIN orders o ON c.customer_id = o.customer_id;
+
+-- LEFT JOIN (customers with or without orders)
+SELECT c.customer_id, c.name, o.order_id, o.amount
+FROM customer c
+LEFT JOIN orders o ON c.customer_id = o.customer_id;
+
+-- RIGHT JOIN (orders with or without matching customers)
+SELECT c.customer_id, c.name, o.order_id, o.amount
+FROM customer c
+RIGHT JOIN orders o ON c.customer_id = o.customer_id;
+
+-- CROSS JOIN (Cartesian)
+SELECT c.customer_id, c.name, o.order_id
+FROM customer c
+CROSS JOIN orders o;
+
+-- SELF JOIN example on customer (find pairs in same city)
+SELECT c1.customer_id AS id1, c1.name AS name1, c2.customer_id AS id2, c2.name AS name2
+FROM customer c1
+JOIN customer c2 ON c1.city = c2.city AND c1.customer_id <> c2.customer_id;
+
+-- FULL OUTER JOIN emulation (MySQL)
+SELECT c.customer_id, c.name, o.order_id, o.amount
+FROM customer c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+UNION
+SELECT c.customer_id, c.name, o.order_id, o.amount
+FROM customer c
+RIGHT JOIN orders o ON c.customer_id = o.customer_id;
