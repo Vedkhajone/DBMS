@@ -1,0 +1,140 @@
+--------------------------------------------------------------
+-- EXPERIMENT 09 : STORED PROCEDURES WITH PARAMETERS (MYSQL)
+--------------------------------------------------------------
+
+-- Create Database (optional)
+CREATE DATABASE IF NOT EXISTS college;
+USE college;
+
+--------------------------------------------------------------
+-- SAMPLE TABLE (Optional for demo)
+--------------------------------------------------------------
+DROP TABLE IF EXISTS students;
+CREATE TABLE students(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50),
+    marks INT
+);
+
+INSERT INTO students (name, marks) VALUES
+('Ramesh', 85),
+('Priya', 92),
+('Amit', 75);
+
+--------------------------------------------------------------
+-- 1. PROCEDURE WITH IN PARAMETER
+--    Displays student details using ID
+--------------------------------------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE getStudentByID(
+    IN sid INT
+)
+BEGIN
+    SELECT * FROM students WHERE id = sid;
+END $$
+
+DELIMITER ;
+
+-- CALL:
+-- CALL getStudentByID(1);
+
+--------------------------------------------------------------
+-- 2. PROCEDURE WITH OUT PARAMETER
+--    Returns total number of students
+--------------------------------------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE countStudents(
+    OUT total INT
+)
+BEGIN
+    SELECT COUNT(*) INTO total FROM students;
+END $$
+
+DELIMITER ;
+
+-- CALL:
+-- CALL countStudents(@t);
+-- SELECT @t;
+
+--------------------------------------------------------------
+-- 3. PROCEDURE WITH INOUT PARAMETER
+--    Add bonus marks to a given marks value
+--------------------------------------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE addBonus(
+    INOUT givenMarks INT,
+    IN bonus INT
+)
+BEGIN
+    SET givenMarks = givenMarks + bonus;
+END $$
+
+DELIMITER ;
+
+-- CALL:
+-- SET @m = 80;
+-- CALL addBonus(@m, 10);
+-- SELECT @m;   -- Output: 90
+
+--------------------------------------------------------------
+-- 4. PROCEDURE WITH IN, OUT, INOUT COMBINED
+--    Calculate the minimum of two numbers
+--------------------------------------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE min_num(
+    IN num1 INT,
+    IN num2 INT,
+    OUT result INT
+)
+BEGIN
+    IF num1 < num2 THEN
+        SET result = num1;
+    ELSE
+        SET result = num2;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- CALL:
+-- CALL min_num(40, 20, @res);
+-- SELECT @res;
+
+--------------------------------------------------------------
+-- 5. FUNCTION WITH PARAMETER
+--    Calculate factorial
+--------------------------------------------------------------
+
+DELIMITER $$
+
+CREATE FUNCTION factorial(n INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE f INT DEFAULT 1;
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= n DO
+        SET f = f * i;
+        SET i = i + 1;
+    END WHILE;
+
+    RETURN f;
+END $$
+
+DELIMITER ;
+
+-- CALL:
+-- SELECT factorial(6);
+
+--------------------------------------------------------------
+-- END OF COMPLETE PARAMETERIZED MYSQL PROGRAM FILE
+--------------------------------------------------------------
