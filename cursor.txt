@@ -1,0 +1,280 @@
+✅ IMPLICIT CURSOR (PL/SQL)
+Table Creation
+CREATE TABLE customers1(
+    id INT PRIMARY KEY,
+    name VARCHAR(22) NOT NULL,
+    age INT NOT NULL,
+    address VARCHAR(22) NOT NULL,
+    salary INT NOT NULL
+);
+
+Insert Records
+INSERT INTO customers1 VALUES (1,'AMAR',33,'pune',4000);
+INSERT INTO customers1 VALUES (2,'RAMAN',44,'kopargaon',5000);
+INSERT INTO customers1 VALUES (3,'SANJAY',55,'nashik',6000);
+
+✅ Implicit Cursor Program
+DECLARE
+    total_rows NUMBER(2);
+BEGIN
+    UPDATE customers1
+    SET salary = salary + 5000;
+
+    IF SQL%NOTFOUND THEN
+        dbms_output.put_line('No customers updated');
+    ELSIF SQL%FOUND THEN
+        total_rows := SQL%ROWCOUNT;
+        dbms_output.put_line(total_rows || ' customers updated');
+    END IF;
+END;
+/
+
+✅ Output:
+Statement processed.
+3 customers updated
+
+✅ Result Table
+ID	NAME	AGE	ADDRESS	SALARY
+1	AMAR	33	pune	9000
+2	RAMAN	44	kopargaon	10000
+3	SANJAY	55	nashik	11000
+✅ EXPLICIT CURSOR (PL/SQL)
+DECLARE
+    c_id customers.id%TYPE;
+    c_name customers.name%TYPE;
+    c_addr customers.address%TYPE;
+
+    CURSOR c_customers IS
+        SELECT id, name, address FROM customers;
+BEGIN
+    OPEN c_customers;
+
+    LOOP
+        FETCH c_customers INTO c_id, c_name, c_addr;
+        EXIT WHEN c_customers%NOTFOUND;
+
+        dbms_output.put_line(c_id || ' ' || c_name || ' ' || c_addr);
+    END LOOP;
+
+    CLOSE c_customers;
+END;
+/
+
+✅ Output:
+3 SANJAY nashik
+2 RAMAN kopargaon
+1 AMAR pune
+
+✅ PART A (MySQL Cursor Example)
+CREATE DEFINER=`root`@`localhost` PROCEDURE getFullName(INOUT fullNameList VARCHAR(4000))
+BEGIN
+    DECLARE finished INT DEFAULT 0;
+    DECLARE fullName VARCHAR(100) DEFAULT "";
+
+    DECLARE curName CURSOR FOR
+        SELECT CONCAT(first_name, ' ', last_name) FROM employees LIMIT 10;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished = 1;
+
+    OPEN curName;
+
+    getName: LOOP
+        FETCH curName INTO fullName;
+
+        IF finished = 1 THEN 
+            LEAVE getName;
+        END IF;
+
+        SET fullNameList = CONCAT(fullName, ';', fullNameList);
+    END LOOP getName;
+
+    CLOSE curName;
+END;
+
+✅ Execution
+SET @fullNameList = 'nin';
+CALL car.getFullName(@fullNameList);
+SELECT @fullNameList;
+
+✅ PART B (Email from Cursor)
+CREATE DEFINER=`root`@`localhost` PROCEDURE getFullName(INOUT fullNameList VARCHAR(4000))
+BEGIN
+    DECLARE finished INT DEFAULT 0;
+    DECLARE fullName VARCHAR(100) DEFAULT "";
+
+    DECLARE curName CURSOR FOR
+        SELECT CONCAT(first_name, last_name, '@gmail.com') FROM employees LIMIT 10;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished = 1;
+
+    OPEN curName;
+
+    getName: LOOP
+        FETCH curName INTO fullName;
+
+        IF finished = 1 THEN 
+            LEAVE getName;
+        END IF;
+
+        SET fullNameList = CONCAT(fullName, ';', fullNameList);
+    END LOOP getName;
+
+    CLOSE curName;
+END;
+
+
+✅ Same execution as Part A.
+
+✅ PART C – GRADE CALCULATION CURSOR (Formatted + Correct Working Code)
+✅ Problem
+
+Write a program using a cursor to calculate and print grade:
+
+Grade A: marks > 80%
+
+Grade B: 50% < marks <= 80%
+
+Grade C: marks <= 50%
+
+✅ Table Example (Create for testing)
+CREATE TABLE students(
+    id INT PRIMARY KEY,
+    s1 INT,
+    s2 INT,
+    s3 INT
+);
+
+
+Insert sample:
+
+INSERT INTO students VALUES 
+(1, 90, 85, 88),
+(2, 60, 55, 58),
+(3, 40, 45, 50);
+
+✅ FULL WORKING CURSOR PROGRAM (Part C)
+DELIMITER $$
+
+CREATE PROCEDURE PrintGrades()
+BEGIN
+    DECLARE finished INT DEFAULT 0;
+    DECLARE a INT;
+    DECLARE b INT;
+    DECLARE c INT;
+    DECLARE total INT;
+    DECLARE percent INT;
+
+    DECLARE curMarks CURSOR FOR
+        SELECT s1, s2, s3 FROM students;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished = 1;
+
+    OPEN curMarks;
+
+    gradeLoop: LOOP
+        FETCH curMarks INTO a, b, c;
+
+        IF finished = 1 THEN
+            LEAVE gradeLoop;
+        END IF;
+
+        SET total = a + b + c;
+        SET percent = total / 3;
+
+        IF percent >= 80 THEN
+            SELECT CONCAT('Marks: ', percent, ' Grade: A') AS Result;
+        ELSEIF percent >= 50 THEN
+            SELECT CONCAT('Marks: ', percent, ' Grade: B') AS Result;
+        ELSE
+            SELECT CONCAT('Marks: ', percent, ' Grade: C') AS Result;
+        END IF;
+
+    END LOOP;
+
+    CLOSE curMarks;
+END $$
+
+DELIMITER ;
+
+✅ Execution
+CALL PrintGrades();
+
+✅ PL/SQL EXCEPTION HANDLING (Formatted)
+✅ Syntax
+DECLARE
+    -- declarations
+BEGIN
+    -- program statements
+EXCEPTION
+    WHEN exception1 THEN
+        -- handler code
+    WHEN exception2 THEN
+        -- handler code
+    WHEN OTHERS THEN
+        -- default handler
+END;
+/
+
+✅ Example 1 – No Data Found
+DECLARE
+    c_id CUSTOMERS.id%TYPE := 8;
+    c_name CUSTOMERS.name%TYPE;
+    c_addr CUSTOMERS.address%TYPE;
+BEGIN
+    SELECT name, address INTO c_name, c_addr
+    FROM customers
+    WHERE id = c_id;
+
+    DBMS_OUTPUT.PUT_LINE('Name: ' || c_name);
+    DBMS_OUTPUT.PUT_LINE('Address: ' || c_addr);
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        dbms_output.put_line('No such customer!');
+END;
+/
+
+
+✅ Output:
+
+No such customer!
+
+✅ Example 2 – Data Exists
+DECLARE
+    c_id customers.id%TYPE := 2;
+    c_name customers.name%TYPE;
+    c_addr customers.address%TYPE;
+BEGIN
+    SELECT name, address INTO c_name, c_addr
+    FROM customers
+    WHERE id = c_id;
+
+    DBMS_OUTPUT.PUT_LINE('Name: ' || c_name);
+    DBMS_OUTPUT.PUT_LINE('Address: ' || c_addr);
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        dbms_output.put_line('No such customer!');
+END;
+/
+
+
+✅ Output:
+
+Name: RAMAN
+Address: kopargaon
+
+✅ RAISING EXCEPTIONS (Formatted)
+✅ Syntax
+DECLARE
+    custom_exception EXCEPTION;
+BEGIN
+    IF condition THEN
+        RAISE custom_exception;
+    END IF;
+
+EXCEPTION
+    WHEN custom_exception THEN
+        dbms_output.put_line('Custom exception raised!');
+END;
+/
